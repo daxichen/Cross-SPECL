@@ -205,16 +205,6 @@ def test(net, diffusion, img, hyperparams):
 
             for (x, y, w, h), out in zip(indices, pred_x_t):
                 probs_sample[x + w // 2 , y + h // 2 ] += out
-
-            # if patch_size == 1 or center_pixel:
-            #     output = output.numpy()
-            # else:
-            #     output = np.transpose(output.numpy(), (0, 2, 3, 1))
-            # for (x, y, w, h), out in zip(indices, output):
-            #     if center_pixel:
-            #         probs[x + w // 2, y + h // 2] += out
-            #     else:
-            #         probs[x : x + w, y : y + h] += out
     return probs, probs_sample
 
 

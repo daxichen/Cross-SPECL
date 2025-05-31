@@ -40,12 +40,6 @@ DATASETS_CONFIG = {
             },
     }
 
-# try:
-#     from custom_datasets import CUSTOM_DATASETS_CONFIG
-#     DATASETS_CONFIG.update(CUSTOM_DATASETS_CONFIG)
-# except ImportError:
-#     pass
-
 class TqdmUpTo(tqdm):
     """Provides `update_to(n)` which uses `tqdm.update(delta_n)`."""
     def update_to(self, b=1, bsize=1, tsize=None):
@@ -150,11 +144,7 @@ def get_dataset(dataset_name, target_folder="./", datasets=DATASETS_CONFIG):
                         "bitumen", "shadow", 'meadow', 'bare soil']
                     
         ignored_labels = [0]
-    # else:
-    #     # Custom dataset
-    #     img, gt, rgb_bands, ignored_labels, label_values, palette = CUSTOM_DATASETS_CONFIG[dataset_name]['loader'](folder)
-
-    # Filter NaN out
+        
     nan_mask = np.isnan(img.sum(axis=-1))
     if np.count_nonzero(nan_mask) > 0:
        print("Warning: NaN have been found in the data. It is preferable to remove them beforehand. Learning on NaN data is disabled.")
@@ -166,17 +156,6 @@ def get_dataset(dataset_name, target_folder="./", datasets=DATASETS_CONFIG):
     # Normalization
     img = np.asarray(img, dtype='float32')
 
-    # img = 2. * img - 1.
-
-    # m, n, d = img.shape[0], img.shape[1], img.shape[2]
-    # norm_data = np.zeros(img.shape)
-    # for i in range(d):
-    #     input_max = np.max(img[:,:,i])
-    #     input_min = np.min(img[:, :, i])
-    #     norm_data[:, :, i] = ((img[:, :, i] - input_min) / (input_max - input_min)) * 2 - 1  # [-1,1]
-    # img = norm_data
-
-    
     m, n, d = img.shape[0], img.shape[1], img.shape[2]
     img= img.reshape((m*n,-1))
     img = img/img.max()
@@ -186,138 +165,6 @@ def get_dataset(dataset_name, target_folder="./", datasets=DATASETS_CONFIG):
     img_temp[img_temp==0]=1
     img = img/img_temp
     img = np.reshape(img,(m,n,-1))
-
-    return img, gt, label_values, ignored_labels, rgb_bands, palette
-
-
-def get_dataset_diffusion(dataset_name, target_folder="./", datasets=DATASETS_CONFIG):
-    """ Gets the dataset specified by name and return the related components.
-    Args:
-        dataset_name: string with the name of the dataset
-        target_folder (optional): folder to store the datasets, defaults to ./
-        datasets (optional): dataset configuration dictionary, defaults to prebuilt one
-    Returns:
-        img: 3D hyperspectral image (WxHxB)
-        gt: 2D int array of labels
-        label_values: list of class names
-        ignored_labels: list of int classes to ignore
-        rgb_bands: int tuple that correspond to red, green and blue bands
-    """
-    palette = None
-    
-    if dataset_name not in datasets.keys():
-        raise ValueError("{} dataset is unknown.".format(dataset_name))
-
-    dataset = datasets[dataset_name]
-
-    folder = target_folder# + datasets[dataset_name].get('folder', dataset_name + '/')
-    if dataset.get('download', False):
-        # Download the dataset if is not present
-        if not os.path.isdir(folder):
-            os.mkdir(folder)
-        for url in datasets[dataset_name]['urls']:
-            # download the files
-            filename = url.split('/')[-1]
-            if not os.path.exists(folder + filename):
-                with TqdmUpTo(unit='B', unit_scale=True, miniters=1,
-                          desc="Downloading {}".format(filename)) as t:
-                    urlretrieve(url, filename=folder + filename,
-                                     reporthook=t.update_to)
-    elif not os.path.isdir(folder):
-       print("WARNING: {} is not downloadable.".format(dataset_name))
-
-    if dataset_name == 'Houston13':
-        # Load the image
-        img = open_file(folder + 'Houston13.mat')['ori_data']
-
-        rgb_bands = [13,20,33]
-
-        gt = open_file(folder + 'Houston13_7gt.mat')['map']
-
-        label_values = ["grass healthy", "grass stressed", "trees",
-                        "water", "residential buildings",
-                        "non-residential buildings", "road"]
-
-        ignored_labels = [0]
-
-    elif dataset_name == 'Houston18':
-        # Load the image
-        img = open_file(folder + 'Houston18.mat')['ori_data']
-
-        rgb_bands = [13,20,33]
-
-        gt = open_file(folder + 'Houston18_7gt.mat')['map']
-
-        label_values = ["grass healthy", "grass stressed", "trees",
-                        "water", "residential buildings",
-                        "non-residential buildings", "road"]
-        
-        ignored_labels = [0]
-
-    elif dataset_name == 'paviaU':
-        # Load the image
-        img = open_file(folder + 'paviaU.mat')['ori_data']
-
-        rgb_bands = [20,30,30]
-
-        gt = open_file(folder + 'paviaU_7gt.mat')['map']
-
-        label_values = ["tree", "asphalt", "brick",
-                        "bitumen", "shadow", 'meadow', 'bare soil']
-
-        ignored_labels = [0]
-        
-    elif dataset_name == 'paviaC':
-        # Load the image
-        img = open_file(folder + 'paviaC.mat')['ori_data']
-
-        rgb_bands = [20,30,30]
-
-        gt = open_file(folder + 'paviaC_7gt.mat')['map']
-
-        label_values = ["tree", "asphalt", "brick",
-                        "bitumen", "shadow", 'meadow', 'bare soil']
-                    
-        ignored_labels = [0]
-    # else:
-    #     # Custom dataset
-    #     img, gt, rgb_bands, ignored_labels, label_values, palette = CUSTOM_DATASETS_CONFIG[dataset_name]['loader'](folder)
-
-    # Filter NaN out
-    nan_mask = np.isnan(img.sum(axis=-1))
-    if np.count_nonzero(nan_mask) > 0:
-       print("Warning: NaN have been found in the data. It is preferable to remove them beforehand. Learning on NaN data is disabled.")
-    img[nan_mask] = 0
-    gt[nan_mask] = 0
-    ignored_labels.append(0)
-
-    ignored_labels = list(set(ignored_labels))
-    # Normalization
-    img = np.asarray(img, dtype='float32')
-
-    m, n, d = img.shape[0], img.shape[1], img.shape[2]
-    norm_data = np.zeros(img.shape)
-    for i in range(d):
-        input_max = np.max(img[:,:,i])
-        input_min = np.min(img[:, :, i])
-        norm_data[:, :, i] = ((img[:, :, i] - input_min) / (input_max - input_min)) * 2 - 1  # [-1,1]
-    img = norm_data
-
-    # for i in range(d):
-    #     norm_data[:, :, i] = img[:, :, i] * 2 - 1  # [-1,1]
-    # img = norm_data
-
-    
-    # m, n, d = img.shape[0], img.shape[1], img.shape[2]
-    # img= img.reshape((m*n,-1))
-    # img = img/img.max()
-    # img_temp = np.sqrt(np.asarray((img**2).sum(1)))
-    # img_temp = np.expand_dims(img_temp,axis=1)
-    # img_temp = img_temp.repeat(d,axis=1)
-    # img_temp[img_temp==0]=1
-    # img = img/img_temp
-    # # img = 2.*img - 1.
-    # img = np.reshape(img,(m,n,-1))
 
     return img, gt, label_values, ignored_labels, rgb_bands, palette
 
@@ -430,12 +277,6 @@ class HyperX(torch.utils.data.Dataset):
         else:
             label = self.labels[i]
             
-        # Add a fourth dimension for 3D CNN
-        # if self.patch_size > 1:
-        #     # Make 4D data ((Batch x) Planes x Channels x Width x Height)
-        #     data = data.unsqueeze(0)
-        # plt.imshow(data[[10,23,23],:,:].permute(1,2,0))
-        # plt.show()
         return data, label
 
 
@@ -459,16 +300,12 @@ class HyperX_test(torch.utils.data.Dataset):
         self.label = gt
         self.patch_size = hyperparams['patch_size']
         self.ignored_labels = set(hyperparams['ignored_labels'])
-        # self.r = int(self.patch_size / 2) + 1
 
         self.center_pixel = hyperparams['center_pixel']
         self.ignored_labels = set(hyperparams['ignored_labels'])
         self.flip_augmentation = hyperparams['flip_augmentation']
         self.radiation_augmentation = hyperparams['radiation_augmentation'] 
         self.mixture_augmentation = hyperparams['mixture_augmentation'] 
-      
-
-        # Fully supervised : use all pixels with label not ignored
 
         mask = np.ones_like(gt)
         for l in self.ignored_labels:
@@ -504,14 +341,6 @@ class HyperX_test(torch.utils.data.Dataset):
         if self.radiation_augmentation:
             data = self.radiation_noise(data)
 
-        # if self.flip_augmentation and self.patch_size > 1 and np.random.random() < 0.5:
-        #     # Perform data augmentation (only on 2D patches)
-        #     data, label = self.flip(data, label)
-        # if self.radiation_augmentation and np.random.random() < 0.5:
-        #         data = self.radiation_noise(data)
-        # if self.mixture_augmentation and np.random.random() < 0.5:
-        #         data = self.mixture_noise(data, label)
-
         # Copy the data into numpy arrays (PyTorch doesn't like numpy views)
         data = np.asarray(np.copy(data).transpose((2, 0, 1)), dtype='float32')
         label = np.asarray(np.copy(label), dtype='int64')
@@ -529,7 +358,6 @@ class HyperX_test(torch.utils.data.Dataset):
         else:
             label = self.labels[i]
         return data, label, (x, y)
-
 
 
 class data_prefetcher():
