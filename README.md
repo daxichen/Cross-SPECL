@@ -9,8 +9,8 @@ We present a new approach for cross-scene hyperspectral image (HSI) classificati
 ```
 1. torch==1.11.0+cu113
 2. python==3.8.3
-3. mmcv==1.3.0
-4. cupy-cuda110==8.5.0
+3. ptflops==0.6.9
+4. timm==0.5.4
 ```
 # Dataset:
 The dataset can be downloaded from here: [HSI datasets](https://github.com/YuxiangZhang-BIT/Data-CSHSI). We greatly appreciate their outstanding contributions.
