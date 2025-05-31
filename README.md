@@ -26,5 +26,5 @@ datasets
 # Usage:
 Houston datasets:
 ```
-python main.py --source_name Houston13 --target_name Houston18 --patch_size 13 --training_sample_ratio 0.8
+python inference.py --save_path ./results/ --data_path ./datasets/Houston/ --target_name Houston18 --patch_size 8
 ```
