@@ -21,8 +21,6 @@ parser.add_argument('--save_path', type=str, default='./results/')
 parser.add_argument('--data_path', type=str, default='./datasets/Houston/')
 parser.add_argument('--target_name', type=str, default='Houston18',
                     help='the name of the source dir')
-parser.add_argument('--source_name', type=str, default='Houston13',
-                    help='the name of the source dir')
 parser.add_argument('--patch_size', type=int, default=8)
 parser.add_argument('--lr', type=float, default=2.5e-4,
                     help="Learning rate, set by the model if not specified.")
@@ -50,9 +48,6 @@ parser.add_argument('--log_path', type=str, default='./logs',
 
 
 # model parameters
-parser.add_argument('--momen', default=0.001,  type=float)
-parser.add_argument('--ridg_reg', default=0.01,  type=float)
-
 parser.add_argument('--perturb_prob', default=0.5,  type=float)
 parser.add_argument('--mask_alpha', default=0.2,  type=float)
 
