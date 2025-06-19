@@ -1,5 +1,5 @@
 # Cross-SPECL
-# Cross-SPECL: Cross-Scene Hyperspectral Classification via Spectral Stability Exploiting and Causal Learning
+# Cross-SPECL: Cross-Scene Hyperspectral Classification via Spectral Stability Exploiting and Causal Learning（Under Review）
 ![DSPLTnet Framework](figure/DSPLTnet.png)
 Cross-SPECL comprises three main components designed for robust cross-scene HSI classification. **1.** The spectral patch low-frequency transformation network minimizes the similarity between original spectral patch features and their low-frequency perturbed counterparts, thereby encouraging the model to focus on class-essential semantic information within the low-frequency components of SD HSIs. **2.** A novel domain-agnostic DAG is constructed to enable the model to identify domain-invariant features through causal structure learning, concurrently pruning domain-specific and spurious features detrimental to model generalization. **3.** A progressive contrastive learning framework is employed to obtain more representative class-conditional prototypes, thereby effectively searching for the domain-agnostic DAG from them. Notably, during inference, the frequency domain filtering branch, the learned domain-agnostic DAG, and the classifier are utilized for cross-scene HSI classification.
 
